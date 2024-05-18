@@ -5,7 +5,12 @@ import tkinter as tk
 from matplotlib import collections
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.patches import Rectangle, Circle
+
+import param
+from ethnocentrism_agent import EthnocentrismAgent
 from ethnocentrism_model import EthnocentrismModel
+from param import RANDOM_COLOR
+
 
 class ModelGUI(tk.Tk):
     def __init__(self, model):
@@ -37,7 +42,8 @@ class ModelGUI(tk.Tk):
         tk.Button(self.control_frame, text="Stop", command=self.stop).pack(side="top")
         tk.Button(self.control_frame, text="Step", command=self.step).pack(side="top")
         tk.Button(self.control_frame, text="Reset", command=self.reset).pack(side="top")
-
+        tk.Button(self.control_frame, text="Init Empty", command=self.init_empty).pack(side="top")
+        tk.Button(self.control_frame, text="Init Full", command=self.init_full).pack(side="top")
 
     # def draw(self):
     #     fig, ax = plt.subplots(figsize=(5, 5))
@@ -143,6 +149,28 @@ class ModelGUI(tk.Tk):
             self.update()
         else:
             self.step()
+
+    def init_empty(self):
+        """清除所有代理并重置画布。"""
+        self.model.schedule.agents.clear()  # 清除所有代理
+        self.canvas.delete('all')  # 清除画布
+        self.shapes = {}
+
+    def init_full(self):
+        """在每个格子中创建一个代理。"""
+        self.canvas.delete('all')  # 清除画布
+        self.shapes = {}
+        for x in range(self.model.grid.width):
+            for y in range(self.model.grid.height):
+                color = self.model.random.choice(param.RANDOM_COLOR)  # 使用模型的随机数生成器
+                cooperate_with_same = self.model.random.random() < param.IMMIGRANT_CHANCE_COOPERATE_WITH_SAME
+                cooperate_with_different = self.model.random.random() < param.IMMIGRANT_CHANCE_COOPERATE_WITH_DIFFERENT
+                agent = EthnocentrismAgent(self.model.next_id(), self.model, color,
+                                           cooperate_with_same, cooperate_with_different)
+                self.model.grid.place_agent(agent, (x, y))
+                self.model.schedule.add(agent)
+        self.draw()  # 重新绘制界面
+
 
 if __name__ == "__main__":
     model = EthnocentrismModel(n=10, width=50, height=50)
