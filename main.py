@@ -9,7 +9,7 @@ from matplotlib.patches import Rectangle, Circle
 import param
 from ethnocentrism_agent import EthnocentrismAgent
 from ethnocentrism_model import EthnocentrismModel
-from param import RANDOM_COLOR
+
 
 
 class ModelGUI(tk.Tk):
@@ -19,17 +19,20 @@ class ModelGUI(tk.Tk):
         self.model = model
 
         # GUI settings
-        self.cell_size = 10
+        self.cell_size = 11
+        self.agent_size = 8
         self.canvas_size = self.model.grid.width * self.cell_size
+        self.window_size = self.canvas_size
         self.running = False
         self.shapes = {}
 
         # Create the frames
-        self.control_frame = tk.Frame(self)
+        self.control_frame = tk.Frame(self, padx=10, pady=20)
         self.control_frame.grid(row=0, column=0, sticky="ns")
 
-        self.canvas_frame = tk.Frame(self)
-        self.canvas_frame.grid(row=0, column=1, sticky="nsew")
+        self.canvas_frame = tk.Frame(self, padx=20, pady=20)
+        self.canvas_frame.grid(row=0, column=1, rowspan=2, sticky="nsew")
+
 
         # Create the drawing canvas
         self.canvas = tk.Canvas(self.canvas_frame, width=self.canvas_size, height=self.canvas_size,
@@ -41,85 +44,45 @@ class ModelGUI(tk.Tk):
         tk.Button(self.control_frame, text="Start", command=self.start).pack(side="top")
         tk.Button(self.control_frame, text="Stop", command=self.stop).pack(side="top")
         tk.Button(self.control_frame, text="Step", command=self.step).pack(side="top")
-        tk.Button(self.control_frame, text="Reset", command=self.reset).pack(side="top")
         tk.Button(self.control_frame, text="Init Empty", command=self.init_empty).pack(side="top")
         tk.Button(self.control_frame, text="Init Full", command=self.init_full).pack(side="top")
 
-    # def draw(self):
-    #     fig, ax = plt.subplots(figsize=(5, 5))
-    #
-    #     agents = self.model.schedule.agents
-    #     shapes = []
-    #     facecolors = []  # Fill colors
-    #     edgecolors = []  # Edge colors
-    #
-    #     for agent in agents:
-    #         x, y = agent.pos
-    #
-    #         if agent.cooperate_with_same:
-    #             shape = Circle((x + 0.5, self.model.grid.height - y - 0.5), radius=0.4)
-    #         else:
-    #             shape = Rectangle((x + 0.1, self.model.grid.height - y - 0.9), 0.8, 0.8)
-    #
-    #         shapes.append(shape)
-    #         edgecolors.append(agent.color)
-    #
-    #         if agent.cooperate_with_different:
-    #             facecolors.append(agent.color)
-    #         else:
-    #             facecolors.append("none")
-    #
-    #     collection = collections.PatchCollection(shapes, facecolors=facecolors, edgecolors=edgecolors)
-    #     ax.add_collection(collection)
-    #
-    #     ax.set_xlim(0, self.model.grid.width)
-    #     ax.set_ylim(0, self.model.grid.height)
-    #
-    #     # Set the locations of the grid lines
-    #     ax.set_xticks(np.arange(0, self.model.grid.width, 1))
-    #     ax.set_yticks(np.arange(0, self.model.grid.height, 1))
-    #
-    #     # Show the grid
-    #     ax.grid(True)
-    #
-    #     # This line is needed to align the plotting of data and the grid
-    #     ax.set_axisbelow(True)
-    #
-    #     if self.canvas is not None:
-    #         self.canvas.get_tk_widget().pack_forget()
-    #
-    #     self.canvas = FigureCanvasTkAgg(fig, master=self)
-    #     self.canvas.draw()
-    #     self.canvas.get_tk_widget().pack(side="top", fill="both", expand=1)
-    #     plt.close(fig)
+        self.geometry(f"{self.window_size + 750}x{self.window_size + 80}")
+
+        self.figure, self.ax = plt.subplots(figsize=(7, 4))
+        plt.subplots_adjust(right=0.85)
+        self.graph = FigureCanvasTkAgg(self.figure, master=self)  # 创建 figure 对象关联的 canvas 对象
+        self.graph.get_tk_widget().grid(row=1, column=0)  # 将图形组件放在控制按钮下面 把 canvas 添加到 tkinter GUI 中
+
 
     def draw(self):
+        gap = (self.cell_size - self.agent_size) / 2
         for agent in self.model.schedule.agents:
             x, y = agent.pos
-            x *= self.cell_size
-            y *= self.cell_size
+            x = x * self.cell_size + gap
+            y = y * self.cell_size + gap
             # Adjust y so the model is displayed in the typical grid orientation
-            y = int(self.canvas['height']) - y
+            y = self.canvas_size - y - self.agent_size
             if agent.cooperate_with_same:
                 if agent.cooperate_with_different:
                     self.shapes[agent.unique_id] = self.canvas.create_oval(
-                        x, y, x + self.cell_size, y + self.cell_size,
+                        x, y, x + self.agent_size, y + self.agent_size,
                         fill=agent.color,
                         outline=agent.color)
                 else:
                     self.shapes[agent.unique_id] = self.canvas.create_oval(
-                        x, y, x + self.cell_size, y + self.cell_size,
+                        x, y, x + self.agent_size, y + self.agent_size,
                         fill="white",
                         outline=agent.color)
             else:
                 if agent.cooperate_with_different:
                     self.shapes[agent.unique_id] = self.canvas.create_rectangle(
-                        x, y, x + self.cell_size, y + self.cell_size,
+                        x, y, x + self.agent_size, y + self.agent_size,
                         fill=agent.color,
                         outline=agent.color)
                 else:
                     self.shapes[agent.unique_id] = self.canvas.create_rectangle(
-                        x, y, x + self.cell_size, y + self.cell_size,
+                        x, y, x + self.agent_size, y + self.agent_size,
                         fill="white",
                         outline=agent.color)
 
@@ -135,13 +98,7 @@ class ModelGUI(tk.Tk):
         self.canvas.delete('all')
         self.shapes = {}
         self.draw()
-
-    def reset(self):
-        self.model = EthnocentrismModel(n=10, width=50, height=50)
-        self.canvas.delete('all')
-        self.shapes = {}
-        self.draw()
-        self.stop()
+        self.update_graph()
 
     def run_model(self):
         while self.running:
@@ -155,6 +112,10 @@ class ModelGUI(tk.Tk):
         self.model.schedule.agents.clear()  # 清除所有代理
         self.canvas.delete('all')  # 清除画布
         self.shapes = {}
+        for agent_type in self.model.agent_count_dict.keys():
+            self.model.agent_count_dict[agent_type] = [0 for i in range(self.model.schedule.steps)]
+
+        self.update_graph()
 
     def init_full(self):
         """在每个格子中创建一个代理。"""
@@ -169,7 +130,28 @@ class ModelGUI(tk.Tk):
                                            cooperate_with_same, cooperate_with_different)
                 self.model.grid.place_agent(agent, (x, y))
                 self.model.schedule.add(agent)
+
         self.draw()  # 重新绘制界面
+        for agent_type in self.model.agent_count_dict.keys():
+            self.model.agent_count_dict[agent_type] = [self.model.grid.width * self.model.grid.height for i in
+                                                       range(self.model.schedule.steps)]
+        self.update_graph()
+
+    def update_graph(self):
+        # 先清空一下原来的数据
+        self.ax.cla()
+        x = list(range(self.model.schedule.steps))  # x坐标
+        for agent_type in self.model.agent_count_dict.keys():
+            y = self.model.agent_count_dict[agent_type]
+            self.ax.plot(x, y, label=agent_type)  # 画一条线
+        self.ax.legend()  # 添加图例
+        self.ax.set_title("Strategy Counts")  # 在这里添加标题
+        self.ax.set_xlabel("Time")  # 设置x轴的标题
+        self.ax.set_ylabel("Count")  # 设置y轴的标题
+
+        # 把图例放在右侧并且确保图例不和图形相交
+        self.ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+        self.graph.draw()  # 更新图形
 
 
 if __name__ == "__main__":

@@ -17,18 +17,17 @@ class EthnocentrismAgent(Agent):
 
     def interact(self):
         neighbors = self.model.grid.get_neighbors(self.pos, moore=False)
-        if neighbors:
-            other_agent = self.random.choice(neighbors)
+        for other_agent in neighbors:
             if self.color == other_agent.color:
                 if self.cooperate_with_same:
-                    self.ptr += param.GAIN_OF_RECEIVING
-                if other_agent.cooperate_with_same:
-                    other_agent.ptr += param.GAIN_OF_RECEIVING
+                    if self.ptr - param.COST_OF_GIVING >= 0:
+                        self.ptr -= param.COST_OF_GIVING
+                        other_agent.ptr += param.GAIN_OF_RECEIVING
             else:
-                if self.cooperate_with_different:
-                    self.ptr += param.GAIN_OF_RECEIVING
-                if other_agent.cooperate_with_different:
-                    other_agent.ptr += param.GAIN_OF_RECEIVING
+                if self.ptr - param.COST_OF_GIVING >= 0:
+                    if self.cooperate_with_different:
+                        self.ptr -= param.COST_OF_GIVING
+                        other_agent.ptr += param.GAIN_OF_RECEIVING
 
     def reproduce(self):
         # 用该代理的生殖潜能(ptr)作为生殖的概率

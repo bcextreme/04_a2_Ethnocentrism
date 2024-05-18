@@ -12,12 +12,13 @@ class EthnocentrismModel(Model):
         self.num_agents = n
         self.grid = MultiGrid(width, height, True)
         self.schedule = RandomActivation(self)
-
-        # 初始化
-        # 初始化，确保我们只创建小于等于 num_agents 的代理
         for _ in range(self.num_agents):
             # 在一个随机但空的单元格中创建代理
             self.create_agent()
+        self.agent_count_dict = {'CC': [],  # same_true_diff_true
+                                 'CD': [],  # same_true_diff_false
+                                 'DC': [],  # same_false_diff_true
+                                 'DD': []}  # same_false_diff_false
 
     def step(self):
         for _ in range(
@@ -25,6 +26,14 @@ class EthnocentrismModel(Model):
             self.create_agent()
         self.schedule.step()
         self.death()
+        for agent_type in self.agent_count_dict.keys():
+            # Map agent_type to corresponding cooperate_with_same and cooperate_with_different values
+            same = True if agent_type[0] == 'C' else False
+            diff = True if agent_type[1] == 'C' else False
+            self.agent_count_dict[agent_type].append(
+                sum([1 for a in self.schedule.agents if
+                     a.cooperate_with_same == same and a.cooperate_with_different == diff])
+            )
 
     def create_agent(self):
         # 首先找到所有空的单元格
@@ -33,7 +42,6 @@ class EthnocentrismModel(Model):
             return
         # 从空单元格列表中随机选择一个位置
         x, y = self.random.choice(empty_cells)
-        print(str(x) + "," + str(y))
         color = self.random.choice(param.RANDOM_COLOR)
         cooperate_with_same = self.random.random() < param.IMMIGRANT_CHANCE_COOPERATE_WITH_SAME
         cooperate_with_different = self.random.random() < param.IMMIGRANT_CHANCE_COOPERATE_WITH_DIFFERENT
