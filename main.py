@@ -11,76 +11,111 @@ class ModelGUI(tk.Tk):
     def __init__(self, model):
         super().__init__()
 
-        self.geometry("800x600")
         self.model = model
-        self.canvas = None
 
+        # GUI settings
+        self.cell_size = 10
+        self.canvas_size = self.model.grid.width * self.cell_size
         self.running = False
-        self.model_reset = False
+        self.shapes = {}
 
-        self.step_button = tk.Button(self, text="Step", command=self.step)
-        self.step_button.pack(side="top")
+        # Create the frames
+        self.control_frame = tk.Frame(self)
+        self.control_frame.grid(row=0, column=0, sticky="ns")
 
-        self.start_button = tk.Button(self, text="Start", command=self.start)
-        self.start_button.pack(side="top")
+        self.canvas_frame = tk.Frame(self)
+        self.canvas_frame.grid(row=0, column=1, sticky="nsew")
 
-        self.stop_button = tk.Button(self, text="Stop", command=self.stop)
-        self.stop_button.pack(side="top")
+        # Create the drawing canvas
+        self.canvas = tk.Canvas(self.canvas_frame, width=self.canvas_size, height=self.canvas_size,
+                                highlightbackground="black", highlightthickness=1)
+        # Call it right after you create the canvas or whenever you need to redraw the grid:
+        self.canvas.pack()
 
-        self.reset_button = tk.Button(self, text="Reset", command=self.reset)
-        self.reset_button.pack(side="top")
+        # Control buttons
+        tk.Button(self.control_frame, text="Start", command=self.start).pack(side="top")
+        tk.Button(self.control_frame, text="Stop", command=self.stop).pack(side="top")
+        tk.Button(self.control_frame, text="Step", command=self.step).pack(side="top")
+        tk.Button(self.control_frame, text="Reset", command=self.reset).pack(side="top")
+
+
+    # def draw(self):
+    #     fig, ax = plt.subplots(figsize=(5, 5))
+    #
+    #     agents = self.model.schedule.agents
+    #     shapes = []
+    #     facecolors = []  # Fill colors
+    #     edgecolors = []  # Edge colors
+    #
+    #     for agent in agents:
+    #         x, y = agent.pos
+    #
+    #         if agent.cooperate_with_same:
+    #             shape = Circle((x + 0.5, self.model.grid.height - y - 0.5), radius=0.4)
+    #         else:
+    #             shape = Rectangle((x + 0.1, self.model.grid.height - y - 0.9), 0.8, 0.8)
+    #
+    #         shapes.append(shape)
+    #         edgecolors.append(agent.color)
+    #
+    #         if agent.cooperate_with_different:
+    #             facecolors.append(agent.color)
+    #         else:
+    #             facecolors.append("none")
+    #
+    #     collection = collections.PatchCollection(shapes, facecolors=facecolors, edgecolors=edgecolors)
+    #     ax.add_collection(collection)
+    #
+    #     ax.set_xlim(0, self.model.grid.width)
+    #     ax.set_ylim(0, self.model.grid.height)
+    #
+    #     # Set the locations of the grid lines
+    #     ax.set_xticks(np.arange(0, self.model.grid.width, 1))
+    #     ax.set_yticks(np.arange(0, self.model.grid.height, 1))
+    #
+    #     # Show the grid
+    #     ax.grid(True)
+    #
+    #     # This line is needed to align the plotting of data and the grid
+    #     ax.set_axisbelow(True)
+    #
+    #     if self.canvas is not None:
+    #         self.canvas.get_tk_widget().pack_forget()
+    #
+    #     self.canvas = FigureCanvasTkAgg(fig, master=self)
+    #     self.canvas.draw()
+    #     self.canvas.get_tk_widget().pack(side="top", fill="both", expand=1)
+    #     plt.close(fig)
 
     def draw(self):
-        fig, ax = plt.subplots(figsize=(5, 5))
-
-        agents = self.model.schedule.agents
-        shapes = []
-        facecolors = []  # Fill colors
-        edgecolors = []  # Edge colors
-
-        for agent in agents:
+        for agent in self.model.schedule.agents:
             x, y = agent.pos
-
+            x *= self.cell_size
+            y *= self.cell_size
+            # Adjust y so the model is displayed in the typical grid orientation
+            y = int(self.canvas['height']) - y
             if agent.cooperate_with_same:
-                shape = Circle((x + 0.5, self.model.grid.height - y - 0.5), radius=0.4)
+                if agent.cooperate_with_different:
+                    self.shapes[agent.unique_id] = self.canvas.create_oval(
+                        x, y, x + self.cell_size, y + self.cell_size,
+                        fill=agent.color,
+                        outline=agent.color)
+                else:
+                    self.shapes[agent.unique_id] = self.canvas.create_oval(
+                        x, y, x + self.cell_size, y + self.cell_size,
+                        fill="white",
+                        outline=agent.color)
             else:
-                shape = Rectangle((x + 0.1, self.model.grid.height - y - 0.9), 0.8, 0.8)
-
-            shapes.append(shape)
-            edgecolors.append(agent.color)
-
-            if agent.cooperate_with_different:
-                facecolors.append(agent.color)
-            else:
-                facecolors.append("none")
-
-        collection = collections.PatchCollection(shapes, facecolors=facecolors, edgecolors=edgecolors)
-        ax.add_collection(collection)
-
-        ax.set_xlim(0, self.model.grid.width)
-        ax.set_ylim(0, self.model.grid.height)
-
-        # Set the locations of the grid lines
-        ax.set_xticks(np.arange(0, self.model.grid.width, 1))
-        ax.set_yticks(np.arange(0, self.model.grid.height, 1))
-
-        # Show the grid
-        ax.grid(True)
-
-        # This line is needed to align the plotting of data and the grid
-        ax.set_axisbelow(True)
-
-        if self.canvas is not None:
-            self.canvas.get_tk_widget().pack_forget()
-
-        self.canvas = FigureCanvasTkAgg(fig, master=self)
-        self.canvas.draw()
-        self.canvas.get_tk_widget().pack(side="top", fill="both", expand=1)
-        plt.close(fig)
-
-    def step(self):
-        self.model.step()
-        self.draw()
+                if agent.cooperate_with_different:
+                    self.shapes[agent.unique_id] = self.canvas.create_rectangle(
+                        x, y, x + self.cell_size, y + self.cell_size,
+                        fill=agent.color,
+                        outline=agent.color)
+                else:
+                    self.shapes[agent.unique_id] = self.canvas.create_rectangle(
+                        x, y, x + self.cell_size, y + self.cell_size,
+                        fill="white",
+                        outline=agent.color)
 
     def start(self):
         self.running = True
@@ -89,17 +124,25 @@ class ModelGUI(tk.Tk):
     def stop(self):
         self.running = False
 
-    def reset(self):
-        self.running = False
-        self.model_reset = True
-        self.model = EthnocentrismModel(n=10, width=50, height=50)  # Reset the model
+    def step(self):
+        self.model.step()
+        self.canvas.delete('all')
+        self.shapes = {}
         self.draw()
 
-    def run_model(self):
-        while self.running and not self.model_reset:
-            self.model.step()
+    def reset(self):
+        self.model = EthnocentrismModel(n=10, width=50, height=50)
+        self.canvas.delete('all')
+        self.shapes = {}
+        self.draw()
+        self.stop()
 
-        self.model_reset = False
+    def run_model(self):
+        while self.running:
+            self.step()
+            self.update()
+        else:
+            self.step()
 
 if __name__ == "__main__":
     model = EthnocentrismModel(n=10, width=50, height=50)
