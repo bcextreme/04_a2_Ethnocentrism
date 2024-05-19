@@ -17,17 +17,15 @@ class EthnocentrismModel:
         for i in range(self.num_agents):
             self.create_agent()
 
-        self.agent_count_dict = {'CC': [],  # same_true_diff_true
-                                 'CD': [],  # same_true_diff_false
-                                 'DC': [],  # same_false_diff_true
-                                 'DD': []}  # same_false_diff_false
+        self.agent_count_dict = {'CC': 0, 'CD': 0, 'DC': 0, 'DD': 0}  # 使用整数进行实时计数
+        self.csv_file_stats = open('agent_stats.csv', mode='w', newline='', encoding='utf-8')
+        self.csv_writer_stats = csv.writer(self.csv_file_stats)
+        self.csv_writer_stats.writerow(["Step", "CC", "CD", "DC", "DD"])
 
         self.csv_file = open('model_output.csv', mode='w', newline='', encoding='utf-8')
         self.csv_writer = csv.writer(self.csv_file)
         self.csv_writer.writerow(
             ["UniqueID", "PosX", "PosY", "Color", "CooperateWithSame", "CooperateWithDifferent", "Step"])
-
-
 
     def step(self):
         self.record_agents_state()
@@ -41,18 +39,20 @@ class EthnocentrismModel:
         # Simulation step for each agent
         random.shuffle(self.schedule)
         for agent in self.schedule:
-            # Assume each agent has a step method to define its actions
             agent.step()
-        self.death()
-        for agent_type in self.agent_count_dict.keys():
-            # Map agent_type to corresponding cooperate_with_same and cooperate_with_different values
-            same = agent_type[0] == 'C'
-            diff = agent_type[1] == 'D'
 
-            self.agent_count_dict[agent_type].append(
-                sum(1 for agent in self.schedule if
-                    agent.cooperate_with_same == same and agent.cooperate_with_different == diff)
-            )
+        self.death()
+
+        # Reset agent counts for this step
+        for key in self.agent_count_dict.keys():
+            self.agent_count_dict[key] = 0
+
+        for agent in self.schedule:
+            key = ('C' if agent.cooperate_with_same else 'D') + ('C' if agent.cooperate_with_different else 'D')
+            self.agent_count_dict[key] += 1
+
+        # Record the counts at every step
+        self.record_agent_counts()
 
     def create_agent(self):
         empty_cells = [k for k, v in self.grid.items() if v is None]
@@ -136,6 +136,15 @@ class EthnocentrismModel:
                 self.step_count
             ])
 
+    def record_agent_counts(self):
+        counts = [self.agent_count_dict['CC'], self.agent_count_dict['CD'],
+                  self.agent_count_dict['DC'], self.agent_count_dict['DD']]
+        self.csv_writer_stats.writerow([self.step_count] + counts)
+        self.csv_file_stats.flush()  # 强制刷新写入
+
+    def close_files(self):
+        self.csv_file_stats.close()
+
     def __del__(self):  # 模型被销毁时触发
         self.csv_file.close()  # 确保文件被正确关闭
-
+        self.csv_file_stats.close()
