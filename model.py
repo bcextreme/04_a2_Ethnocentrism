@@ -47,7 +47,7 @@ class EthnocentrismModel:
         for agent_type in self.agent_count_dict.keys():
             # Map agent_type to corresponding cooperate_with_same and cooperate_with_different values
             same = agent_type[0] == 'C'
-            diff = agent_type[1] == 'D'
+            diff = agent_type[1] == 'C'
 
             self.agent_count_dict[agent_type].append(
                 sum(1 for agent in self.schedule if
