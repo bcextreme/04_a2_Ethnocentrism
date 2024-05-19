@@ -17,10 +17,13 @@ class EthnocentrismModel:
         for i in range(self.num_agents):
             self.create_agent()
 
-        self.agent_count_dict = {'CC': 0, 'CD': 0, 'DC': 0, 'DD': 0}  # 使用整数进行实时计数
-        self.csv_file_stats = open('agent_stats.csv', mode='w', newline='', encoding='utf-8')
-        self.csv_writer_stats = csv.writer(self.csv_file_stats)
-        self.csv_writer_stats.writerow(["Step", "CC", "CD", "DC", "DD"])
+            self.agent_count_dict = {
+                'left': {'CC': 0, 'CD': 0, 'DC': 0, 'DD': 0},
+                'right': {'CC': 0, 'CD': 0, 'DC': 0, 'DD': 0}
+            }
+            self.csv_file_stats = open('agent_stats.csv', mode='w', newline='', encoding='utf-8')
+            self.csv_writer_stats = csv.writer(self.csv_file_stats)
+            self.csv_writer_stats.writerow(["Step", "L_CC", "L_CD", "L_DC", "L_DD", "R_CC", "R_CD", "R_DC", "R_DD"])
 
         self.csv_file = open('model_output.csv', mode='w', newline='', encoding='utf-8')
         self.csv_writer = csv.writer(self.csv_file)
@@ -34,7 +37,7 @@ class EthnocentrismModel:
 
         num_new_agents = min(param.IMMIGRANTS_PER_DAY, empty_cells)
         for _ in range(num_new_agents):
-            self.create_agent()  # Assign a new unique ID based on the current schedule size
+            self.create_agent()
 
         # Simulation step for each agent
         random.shuffle(self.schedule)
@@ -44,12 +47,15 @@ class EthnocentrismModel:
         self.death()
 
         # Reset agent counts for this step
-        for key in self.agent_count_dict.keys():
-            self.agent_count_dict[key] = 0
+        for region in self.agent_count_dict.values():
+            for key in region:
+                region[key] = 0
 
+        # Update counts for each agent in left or right area
         for agent in self.schedule:
             key = ('C' if agent.cooperate_with_same else 'D') + ('C' if agent.cooperate_with_different else 'D')
-            self.agent_count_dict[key] += 1
+            area = 'right' if self.is_affluent_area(agent.pos) else 'left'
+            self.agent_count_dict[area][key] += 1
 
         # Record the counts at every step
         self.record_agent_counts()
@@ -137,13 +143,17 @@ class EthnocentrismModel:
             ])
 
     def record_agent_counts(self):
-        counts = [self.agent_count_dict['CC'], self.agent_count_dict['CD'],
-                  self.agent_count_dict['DC'], self.agent_count_dict['DD']]
-        self.csv_writer_stats.writerow([self.step_count] + counts)
-        self.csv_file_stats.flush()  # 强制刷新写入
+        left_counts = [self.agent_count_dict['left'][key] for key in ['CC', 'CD', 'DC', 'DD']]
+        right_counts = [self.agent_count_dict['right'][key] for key in ['CC', 'CD', 'DC', 'DD']]
+        self.csv_writer_stats.writerow([self.step_count] + left_counts + right_counts)
+        self.csv_file_stats.flush()  # Ensure the data is written to disk immediately
 
     def close_files(self):
         self.csv_file_stats.close()
+
+    def is_affluent_area(self, pos):
+        # 判断位置是否在富裕区域（假设棋盘右半边）
+        return pos[0] >= self.grid_width // 2
 
     def __del__(self):  # 模型被销毁时触发
         self.csv_file.close()  # 确保文件被正确关闭

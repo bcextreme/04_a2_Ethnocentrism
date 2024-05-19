@@ -21,16 +21,23 @@ class EthnocentrismAgent:
         neighbors_coords = self.model.get_neighbors(self.pos, moore=False, all=False)  # 只获取存在的
         neighbors = [self.model.grid.get(pos) for pos in neighbors_coords]  # 获取agent对象
         for other_agent in neighbors:
+            # 检查当前代理是否在富裕区域
+            affluent = self.model.is_affluent_area(self.pos)
+
+            # 根据是否在富裕区调整交互的成本和收益
+            cost_of_giving = param.COST_OF_GIVING / 2 if affluent else param.COST_OF_GIVING
+            gain_of_receiving = param.GAIN_OF_RECEIVING * 2 if affluent else param.GAIN_OF_RECEIVING
+
             if self.color == other_agent.color:
                 if self.cooperate_with_same:
-                    if self.ptr - param.COST_OF_GIVING >= 0:
-                        self.ptr -= param.COST_OF_GIVING
-                        other_agent.ptr += param.GAIN_OF_RECEIVING
+                    if self.ptr - cost_of_giving >= 0:
+                        self.ptr -= cost_of_giving
+                        other_agent.ptr += gain_of_receiving
             else:
-                if self.ptr - param.COST_OF_GIVING >= 0:
-                    if self.cooperate_with_different:
-                        self.ptr -= param.COST_OF_GIVING
-                        other_agent.ptr += param.GAIN_OF_RECEIVING
+                if self.cooperate_with_different:
+                    if self.ptr - cost_of_giving >= 0:
+                        self.ptr -= cost_of_giving
+                        other_agent.ptr += gain_of_receiving
 
     def reproduce(self):
         # 使用该代理的生殖潜能(ptr)作为生殖的概率
