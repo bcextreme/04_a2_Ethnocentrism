@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
+
 def plot_agent_data(csv_file):
     # 读取CSV文件
     data = pd.read_csv(csv_file)
@@ -9,10 +10,10 @@ def plot_agent_data(csv_file):
     plt.figure(figsize=(10, 6), dpi=80)
 
     # 为每种代理类型绘制折线图
-    plt.plot(data['Step'], data['CC'], label='CC', linewidth=2)
-    plt.plot(data['Step'], data['CD'], label='CD', linewidth=2)
-    plt.plot(data['Step'], data['DC'], label='DC', linewidth=2)
-    plt.plot(data['Step'], data['DD'], label='DD', linewidth=2)
+    plt.plot(data['Step'], data['CC'], label='CC', color='green', linewidth=2)
+    plt.plot(data['Step'], data['CD'], label='CD', color='red', linewidth=2)
+    plt.plot(data['Step'], data['DC'], label='DC', color='yellow', linewidth=2)
+    plt.plot(data['Step'], data['DD'], label='DD', color='black', linewidth=2)
 
     # 添加标题和标签
     plt.title('Agent Cooperation Over Time')
@@ -28,6 +29,7 @@ def plot_agent_data(csv_file):
     # 保存图像或显示图表
     plt.savefig('agent_cooperation.png')  # 保存到文件
     plt.show()  # 显示图表
+
 
 if __name__ == '__main__':
     # 指定CSV文件路径
