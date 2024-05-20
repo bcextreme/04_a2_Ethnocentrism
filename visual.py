@@ -89,15 +89,23 @@ class ModelGUI(tk.Tk):
         self.model.step()
         self.canvas.delete('all')
         self.shapes = {}
-        self.draw()
+    #     self.draw()
 
+
+    # def run_model(self):
+    #     while self.running:
+    #         self.step()
+    #         self.update()
+    #     else:
+    #         self.step()
 
     def run_model(self):
-        while self.running:
+        steps = 0  # 初始化步数计数器
+        while self.running and steps < 1000:  # 运行一千步后停止
             self.step()
             self.update()
-        else:
-            self.step()
+            steps += 1
+        self.running = False  # 运行结束后确保模型停止
 
     def init_empty(self):
         """清除所有代理并重置画布。"""
