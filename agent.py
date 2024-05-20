@@ -22,13 +22,13 @@ class EthnocentrismAgent:
         neighbors = [self.model.grid.get(pos) for pos in neighbors_coords]  # 获取agent对象
         for other_agent in neighbors:
             if self.color == other_agent.color:
-                if self.cooperate_with_same:
-                    if self.ptr - param.COST_OF_GIVING >= 0:
+                if self.cooperate_with_same and other_agent.cooperate_with_same:
+                    if (self.ptr - param.COST_OF_GIVING >= 0) and (other_agent.ptr - param.COST_OF_GIVING >= 0):
                         self.ptr -= param.COST_OF_GIVING
                         other_agent.ptr += param.GAIN_OF_RECEIVING
             else:
-                if self.ptr - param.COST_OF_GIVING >= 0:
-                    if self.cooperate_with_different:
+                if (self.ptr - param.COST_OF_GIVING >= 0) and (other_agent.ptr - param.COST_OF_GIVING >= 0):
+                    if self.cooperate_with_different and other_agent.cooperate_with_different:
                         self.ptr -= param.COST_OF_GIVING
                         other_agent.ptr += param.GAIN_OF_RECEIVING
 
