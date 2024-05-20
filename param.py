@@ -8,3 +8,7 @@ COST_OF_GIVING = 0.01
 GAIN_OF_RECEIVING = 0.03
 IMMIGRANTS_PER_DAY = 1
 RANDOM_COLOR = ["Red", "Blue", "Yellow", "Green"]
+# RANDOM_COLOR = ["Red", "Blue", "Yellow", "Green", "Orange", "Purple", "Cyan", "Magenta"]
+# RANDOM_COLOR = ["Red", "Blue", "Yellow", "Green", "Orange", "Purple", "Cyan", "Magenta",
+#                 "Brown", "Pink", "Lime", "Teal", "Lavender", "Olive", "Navy", "Maroon"]
+# RANDOM_COLOR = ["Red", "Blue"]
