@@ -1,11 +1,11 @@
 import csv
 import random
-
 import param
 from agent import EthnocentrismAgent
 
 
 class EthnocentrismModel:
+    # Initializes the model.
     def __init__(self, n, width, height):
         self.num_agents = n
         self.grid_width = width
@@ -17,7 +17,8 @@ class EthnocentrismModel:
         for i in range(self.num_agents):
             self.create_agent()
 
-        self.agent_count_dict = {'CC': 0, 'CD': 0, 'DC': 0, 'DD': 0}  # 使用整数进行实时计数
+        # Use integers for real-time counting
+        self.agent_count_dict = {'CC': 0, 'CD': 0, 'DC': 0, 'DD': 0}
         self.csv_file_stats = open('agent_stats.csv', mode='w', newline='', encoding='utf-8')
         self.csv_writer_stats = csv.writer(self.csv_file_stats)
         self.csv_writer_stats.writerow(["Step", "CC", "CD", "DC", "DD"])
@@ -27,6 +28,7 @@ class EthnocentrismModel:
         self.csv_writer.writerow(
             ["UniqueID", "PosX", "PosY", "Color", "CooperateWithSame", "CooperateWithDifferent", "Step"])
 
+    # Simulates one step in the model.
     def step(self):
         self.record_agents_state()
         self.step_count += 1
@@ -36,24 +38,23 @@ class EthnocentrismModel:
         for _ in range(num_new_agents):
             self.create_agent()  # Assign a new unique ID based on the current schedule size
 
-        # Simulation step for each agent
         random.shuffle(self.schedule)
         for agent in self.schedule:
             agent.step()
 
         self.death()
 
-        # Reset agent counts for this step
         for key in self.agent_count_dict.keys():
             self.agent_count_dict[key] = 0
 
         for agent in self.schedule:
-            key = ('C' if agent.cooperate_with_same else 'D') + ('C' if agent.cooperate_with_different else 'D')
+            key = (('C' if agent.cooperate_with_same else 'D')
+                   + ('C' if agent.cooperate_with_different else 'D'))
             self.agent_count_dict[key] += 1
 
-        # Record the counts at every step
         self.record_agent_counts()
 
+    # Creates a new agent.
     def create_agent(self):
         empty_cells = [k for k, v in self.grid.items() if v is None]
         if not empty_cells:
@@ -62,21 +63,22 @@ class EthnocentrismModel:
         pos = random.choice(empty_cells)
         color = random.choice(param.RANDOM_COLOR)
         cooperate_with_same = random.random() < param.IMMIGRANT_CHANCE_COOPERATE_WITH_SAME
-        cooperate_with_different = random.random() < param.IMMIGRANT_CHANCE_COOPERATE_WITH_DIFFERENT
+        cooperate_with_different = (random.random()
+                                    < param.IMMIGRANT_CHANCE_COOPERATE_WITH_DIFFERENT)
 
-        # 注意这里我们也传递了位置 pos 给代理
         agent = EthnocentrismAgent(
             unique_id=self.next_id(),
             model=self,
             color=color,
             cooperate_with_same=cooperate_with_same,
             cooperate_with_different=cooperate_with_different,
-            pos=pos  # 这里传递了pos
+            pos=pos  # This line also passes the position to the agent
         )
 
         self.grid[pos] = agent
         self.schedule.append(agent)
 
+    # Returns a list of neighbors.
     def get_neighbors(self, pos, moore=False, all=False):
         directions = [
             (-1, 0),  # Left
@@ -86,7 +88,6 @@ class EthnocentrismModel:
         ]
 
         if moore:
-            # Include diagonal neighbors
             directions += [
                 (-1, -1),  # Bottom Left
                 (-1, 1),  # Top Left
@@ -98,7 +99,6 @@ class EthnocentrismModel:
         for dx, dy in directions:
             x, y = pos[0] + dx, pos[1] + dy
 
-            # Check if (x, y) is within the bounds of the grid
             if 0 <= x < self.grid_width and 0 <= y < self.grid_height:
                 if all:  # Return all positions
                     neighbors.append((x, y))
@@ -108,22 +108,23 @@ class EthnocentrismModel:
 
         return neighbors
 
+    # Handles agent death.
     def death(self):
-        random.shuffle(self.schedule)  # Now we shuffle the list
+        random.shuffle(self.schedule)  # Shuffle the list
         alive_agents = []
         for agent in self.schedule:
             if random.random() >= param.DEATH_RATE:
                 alive_agents.append(agent)
             else:
-                # Mark the agent's cell as empty
-                self.grid[agent.pos] = None  # Assuming each agent knows its position
+                self.grid[agent.pos] = None  # Mark the agent's cell as empty
         self.schedule = alive_agents
 
+    # Generates an ID for a new agent.
     def next_id(self):
-        # 返回当前的ID，并将其递增以供下次使用
         self.current_id += 1
         return self.current_id - 1
 
+    # Records the state of each agent at the current step in a CSV file.
     def record_agents_state(self):
         for agent in self.schedule:
             self.csv_writer.writerow([
@@ -136,15 +137,18 @@ class EthnocentrismModel:
                 self.step_count
             ])
 
+    # Logs the counts of agent interactions by type at each step and flushes to CSV.
     def record_agent_counts(self):
         counts = [self.agent_count_dict['CC'], self.agent_count_dict['CD'],
                   self.agent_count_dict['DC'], self.agent_count_dict['DD']]
         self.csv_writer_stats.writerow([self.step_count] + counts)
-        self.csv_file_stats.flush()  # 强制刷新写入
+        self.csv_file_stats.flush()  # Force flush writing
 
+    # Closes statistical output files.
     def close_files(self):
         self.csv_file_stats.close()
 
-    def __del__(self):  # 模型被销毁时触发
-        self.csv_file.close()  # 确保文件被正确关闭
+    # Ensures files are closed properly.
+    def __del__(self):
+        self.csv_file.close()
         self.csv_file_stats.close()
