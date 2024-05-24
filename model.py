@@ -26,7 +26,8 @@ class EthnocentrismModel:
         self.csv_file = open('model_output.csv', mode='w', newline='', encoding='utf-8')
         self.csv_writer = csv.writer(self.csv_file)
         self.csv_writer.writerow(
-            ["UniqueID", "PosX", "PosY", "Color", "CooperateWithSame", "CooperateWithDifferent", "Step"])
+            ["UniqueID", "PosX", "PosY", "Color", 
+             "CooperateWithSame", "CooperateWithDifferent", "Step"])
 
     # Simulates one step in the model.
     def step(self):

@@ -28,7 +28,8 @@ class ModelGUI(tk.Tk):
         self.canvas_frame.grid(row=0, column=1, rowspan=2, sticky="nsew")
 
         # Create the drawing canvas
-        self.canvas = tk.Canvas(self.canvas_frame, width=self.canvas_size, height=self.canvas_size,
+        self.canvas = tk.Canvas(self.canvas_frame, 
+                                width=self.canvas_size, height=self.canvas_size,
                                 highlightbackground="black", highlightthickness=1)
         self.canvas.pack()
 
