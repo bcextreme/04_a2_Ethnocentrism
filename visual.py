@@ -128,6 +128,6 @@ class ModelGUI(tk.Tk):
 
 
 if __name__ == "__main__":
-    model = EthnocentrismModel(n=10, width=50, height=50)
+    model = EthnocentrismModel(n=0, width=50, height=50)
     app = ModelGUI(model)
     app.mainloop()
