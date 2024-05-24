@@ -96,21 +96,24 @@ class ModelGUI(tk.Tk):
         self.model.schedule.clear()
         self.canvas.delete('all')
         self.shapes = {}
-        self.model.grid = {(x, y): None for x in range(self.model.grid_width) for y in range(self.model.grid_height)}
+        self.model.grid = {(x, y): None for x in range(self.model.grid_width)
+                           for y in range(self.model.grid_height)}
 
     # Fills the entire model grid with agents.
     def init_full(self):
         """Creates an agent in every cell."""
         self.canvas.delete('all')
         self.shapes = {}
-        self.model.grid = {(x, y): None for x in range(self.model.grid_width) for y in range(self.model.grid_height)}
+        self.model.grid = {(x, y): None for x in range(self.model.grid_width)
+                           for y in range(self.model.grid_height)}
         self.model.schedule = []
         for x in range(self.model.grid_width):
             for y in range(self.model.grid_height):
                 unique_id = len(self.model.schedule)
                 color = random.choice(param.RANDOM_COLOR)
                 cooperate_with_same = random.random() < param.IMMIGRANT_CHANCE_COOPERATE_WITH_SAME
-                cooperate_with_different = random.random() < param.IMMIGRANT_CHANCE_COOPERATE_WITH_DIFFERENT
+                cooperate_with_different = (random.random()
+                                            < param.IMMIGRANT_CHANCE_COOPERATE_WITH_DIFFERENT)
                 pos = (x, y)
                 agent = EthnocentrismAgent(unique_id, self.model, color,
                                            cooperate_with_same, cooperate_with_different, pos)

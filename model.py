@@ -53,7 +53,8 @@ class EthnocentrismModel:
                 region[key] = 0
 
         for agent in self.schedule:
-            key = ('C' if agent.cooperate_with_same else 'D') + ('C' if agent.cooperate_with_different else 'D')
+            key = (('C' if agent.cooperate_with_same else 'D')
+                   + ('C' if agent.cooperate_with_different else 'D'))
             area = 'right' if self.is_affluent_area(agent.pos) else 'left'
             self.agent_count_dict[area][key] += 1
 
@@ -68,7 +69,8 @@ class EthnocentrismModel:
         pos = random.choice(empty_cells)
         color = random.choice(param.RANDOM_COLOR)
         cooperate_with_same = random.random() < param.IMMIGRANT_CHANCE_COOPERATE_WITH_SAME
-        cooperate_with_different = random.random() < param.IMMIGRANT_CHANCE_COOPERATE_WITH_DIFFERENT
+        cooperate_with_different = (random.random()
+                                    < param.IMMIGRANT_CHANCE_COOPERATE_WITH_DIFFERENT)
 
         agent = EthnocentrismAgent(
             unique_id=self.next_id(),
@@ -145,7 +147,8 @@ class EthnocentrismModel:
         left_counts = [self.agent_count_dict['left'][key] for key in ['CC', 'CD', 'DC', 'DD']]
         right_counts = [self.agent_count_dict['right'][key] for key in ['CC', 'CD', 'DC', 'DD']]
         self.csv_writer_stats.writerow([self.step_count] + left_counts + right_counts)
-        self.csv_file_stats.flush()  # Ensure the data is written to disk immediately
+        # Ensure the data is written to disk immediately
+        self.csv_file_stats.flush()
 
     # Closes statistical output files.
     def close_files(self):
