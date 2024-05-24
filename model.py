@@ -36,7 +36,8 @@ class EthnocentrismModel:
 
         num_new_agents = min(param.IMMIGRANTS_PER_DAY, empty_cells)
         for _ in range(num_new_agents):
-            self.create_agent()  # Assign a new unique ID based on the current schedule size
+            # Assign a new unique ID based on the current schedule size
+            self.create_agent()
 
         random.shuffle(self.schedule)
         for agent in self.schedule:
@@ -62,7 +63,8 @@ class EthnocentrismModel:
 
         pos = random.choice(empty_cells)
         color = random.choice(param.RANDOM_COLOR)
-        cooperate_with_same = random.random() < param.IMMIGRANT_CHANCE_COOPERATE_WITH_SAME
+        cooperate_with_same = (random.random()
+                               < param.IMMIGRANT_CHANCE_COOPERATE_WITH_SAME)
         cooperate_with_different = (random.random()
                                     < param.IMMIGRANT_CHANCE_COOPERATE_WITH_DIFFERENT)
 

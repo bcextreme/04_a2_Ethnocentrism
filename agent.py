@@ -3,7 +3,8 @@ import random
 
 class EthnocentrismAgent:
     # Initializes an agent.
-    def __init__(self, unique_id, model, color, cooperate_with_same, cooperate_with_different, pos):
+    def __init__(self, unique_id, model, color,
+                 cooperate_with_same, cooperate_with_different, pos):
         self.unique_id = unique_id
         self.model = model
         self.color = color
