@@ -4,7 +4,8 @@ import random
 
 class EthnocentrismAgent:
     # Initializes an agent.
-    def __init__(self, unique_id, model, color, cooperate_with_same, cooperate_with_different, pos):
+    def __init__(self, unique_id, model, color, 
+                 cooperate_with_same, cooperate_with_different, pos):
         self.unique_id = unique_id
         self.model = model
         self.color = color
@@ -30,7 +31,8 @@ class EthnocentrismAgent:
 
             # Adjust interaction costs and gains if in an affluent area
             cost_of_giving = param.COST_OF_GIVING / 2 if affluent else param.COST_OF_GIVING
-            gain_of_receiving = param.GAIN_OF_RECEIVING * 2 if affluent else param.GAIN_OF_RECEIVING
+            gain_of_receiving = param.GAIN_OF_RECEIVING * 2 if affluent else \
+                param.GAIN_OF_RECEIVING
 
             if self.color == other_agent.color:
                 if self.cooperate_with_same:
