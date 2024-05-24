@@ -13,7 +13,7 @@
 
 ## Running the Model
 To run the model, you need to execute visual.py
-This script will generate `agent_stats.csv` containing the population distribution and `model_output.csv` containing each individual:
+This script will generate `agent_stats.csv` containing the relationship between the number of dissidents and step changes and `model_output.csv` containing information of all agents in each step:
 - python visual.py
 
 The above is the model implemented according to the assignment requirements, and the following is the file we used when doing experiments and writing reports, drawing the data in `agent_stats.csv` as a plot, for which we introduced external libraries pandas and matplotlib.
