@@ -10,6 +10,7 @@
 - `model.py` - Contains the EthnocentrismModel class that manages the simulation environment.
 - `param.py` - Contains configuration parameters used by agents and the model.
 
+*Note*: The file structure of original_model, extension_model_1 and extension_model_2 are the same. Please use the same script to run all three models.
 
 ## Running the Model
 To run the model, you need to execute visual.py
@@ -18,7 +19,7 @@ This script will generate `agent_stats.csv` containing the relationship between 
 
 The above is the model implemented according to the assignment requirements, and the following is the file we used when doing experiments and writing reports, drawing the data in `agent_stats.csv` as a plot, for which we introduced external libraries pandas and matplotlib.
 
-Note: This data plotng file is independent of the model, and it's just for converting the CSV file into images. After adding this file, the model can still run independently without relying on any external libraries.
+*Note*: This data plotng file is independent of the model, and it's just for converting the CSV file into images. After adding this file, the model can still run independently without relying on any external libraries.
 
 ## Generating Plots
 First, make sure that the external libraries pandas and matplotlib for drawing lines are imported and that `agent_stats.csv` is also located in the current directory.
