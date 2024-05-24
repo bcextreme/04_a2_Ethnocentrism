@@ -3,7 +3,7 @@ import random
 
 
 class EthnocentrismAgent:
-
+    # Initializes an agent.
     def __init__(self, unique_id, model, color, cooperate_with_same, cooperate_with_different, pos):
         self.unique_id = unique_id
         self.model = model
@@ -11,20 +11,24 @@ class EthnocentrismAgent:
         self.cooperate_with_same = cooperate_with_same
         self.cooperate_with_different = cooperate_with_different
         self.ptr = param.INITIAL_PTR
-        self.pos = pos  # 保存代理的位置
+        self.pos = pos  # Save the agent's position
 
+    # Performs a single step.
     def step(self):
         self.interact()
         self.reproduce()
 
+    # Manages interactions with neighboring agents.
     def interact(self):
-        neighbors_coords = self.model.get_neighbors(self.pos, moore=False, all=False)  # 只获取存在的
-        neighbors = [self.model.grid.get(pos) for pos in neighbors_coords]  # 获取agent对象
+        # Get coordinates of existing neighbors only
+        neighbors_coords = self.model.get_neighbors(self.pos, moore=False, all=False)
+        # Retrieve agent objects from coordinates
+        neighbors = [self.model.grid.get(pos) for pos in neighbors_coords]
         for other_agent in neighbors:
-            # 检查当前代理是否在富裕区域
+            # Check if the current agent is in an affluent area
             affluent = self.model.is_affluent_area(self.pos)
 
-            # 根据是否在富裕区调整交互的成本和收益
+            # Adjust interaction costs and gains if in an affluent area
             cost_of_giving = param.COST_OF_GIVING / 2 if affluent else param.COST_OF_GIVING
             gain_of_receiving = param.GAIN_OF_RECEIVING * 2 if affluent else param.GAIN_OF_RECEIVING
 
@@ -39,39 +43,44 @@ class EthnocentrismAgent:
                         self.ptr -= cost_of_giving
                         other_agent.ptr += gain_of_receiving
 
+    # Determines if reproduction occurs.
     def reproduce(self):
-        # 使用该代理的生殖潜能(ptr)作为生殖的概率
+        # Use the agent's reproductive potential (ptr) as the probability of reproduction
         if random.random() < self.ptr:
-            # 获取周围的Agent对象
+            # Get coordinates of all neighboring positions
             neighbor_all_coords = set(self.model.get_neighbors(self.pos, moore=False, all=True))
             neighbor_coords = set(self.model.get_neighbors(self.pos, moore=False, all=False))
-            # 获取周围的空格子坐标
+            # Find coordinates of empty neighboring cells
             empty_cells = list(neighbor_all_coords - neighbor_coords)
-            if empty_cells:  # 如果有空位
+            if empty_cells:  # If there are empty spots
                 new_pos = random.choice(empty_cells)
-                # 创建代理，考虑突变
+                # Create agent, considering mutation
                 new_agent = EthnocentrismAgent(
                     unique_id=self.model.next_id(),
                     model=self.model,
-                    color=self.mutate_color(self.color),  # 可能发生突变的颜色
-                    cooperate_with_same=self.mutate_strategy(self.cooperate_with_same),  # 可能发生突变的合作策略
-                    cooperate_with_different=self.mutate_strategy(self.cooperate_with_different),  # 可能发生突变的合作策略
-                    pos=new_pos  # 新代理的位置
+                    color=self.mutate_color(self.color),  # Color may mutate
+                    # Cooperation strategy may mutate
+                    cooperate_with_same=self.mutate_strategy(self.cooperate_with_same),
+                    # Cooperation strategy may mutate
+                    cooperate_with_different=self.mutate_strategy(self.cooperate_with_different),
+                    pos=new_pos  # Position of the new agent
                 )
 
                 self.model.grid[new_pos] = new_agent
                 self.model.schedule.append(new_agent)
 
+    # Mutates the agent's color.
     def mutate_color(self, color):
-        # 简单示例：有小概率改变颜色
-        if random.random() < param.MUTATION_RATE:  # 突变率
+        # Simple example: small chance to change color
+        if random.random() < param.MUTATION_RATE:  # Mutation rate
             return random.choice(param.RANDOM_COLOR)
         else:
             return color
 
+    # Mutates the agent's cooperation strategy.
     def mutate_strategy(self, strategy):
-        # 简单示例：有小概率改变策略
-        if random.random() < param.MUTATION_RATE:  # 突变率
+        # Simple example: small chance to change strategy
+        if random.random() < param.MUTATION_RATE:  # Mutation rate
             return not strategy
         else:
             return strategy

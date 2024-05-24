@@ -2,13 +2,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 def plot_agent_data(csv_file):
-    # 读取CSV文件
+    # Read CSV file
     data = pd.read_csv(csv_file)
 
-    # 创建一个带有两个子图的图表，每个子图都有自己的坐标轴
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 12), dpi=80)  # 两个子图，垂直排列
+    # Create a chart with two subplots, each with its own axes
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 12), dpi=80)  # Two subplots, vertical layout
 
-    # 在第一个子图上绘制左边区域的数据
+    # Plot data for the left area on the first subplot
     ax1.plot(data['Step'], data['L_CC'], label='L_CC', color='green', linewidth=2)
     ax1.plot(data['Step'], data['L_CD'], label='L_CD', color='red', linewidth=2)
     ax1.plot(data['Step'], data['L_DC'], label='L_DC', color='yellow', linewidth=2)
@@ -19,7 +19,7 @@ def plot_agent_data(csv_file):
     ax1.legend()
     ax1.grid(True)
 
-    # 在第二个子图上绘制右边区域的数据
+    # Plot data for the right area on the second subplot
     ax2.plot(data['Step'], data['R_CC'], label='R_CC', color='green', linewidth=2)
     ax2.plot(data['Step'], data['R_CD'], label='R_CD', color='red', linewidth=2)
     ax2.plot(data['Step'], data['R_DC'], label='R_DC', color='yellow', linewidth=2)
@@ -30,14 +30,14 @@ def plot_agent_data(csv_file):
     ax2.legend()
     ax2.grid(True)
 
-    # 调整子图间距
+    # Adjust subplot spacing
     plt.tight_layout()
 
-    # 保存图像或显示图表
-    plt.savefig('agent_cooperation_comparison.png')  # 保存到文件
-    plt.show()  # 显示图表
+    # Save the image or display the plot
+    plt.savefig('agent_cooperation_comparison.png')  # Save to file
+    plt.show()  # Display the plot
 
 if __name__ == '__main__':
-    # 指定CSV文件路径
+    # Specify the path to the CSV file
     csv_file = 'agent_stats.csv'
     plot_agent_data(csv_file)
